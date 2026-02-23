@@ -1,0 +1,55 @@
+@font-face {
+  font-family: 'Smiley Sans';
+  src: url('/fonts/SmileySans-Oblique.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ink-strong: #1c2f53;
+  --ink-muted: #5d6f8a;
+  --panel-bg: rgba(255, 255, 255, 0.95);
+  --panel-subtle: #f7faff;
+  --border-soft: #d5e0f0;
+
+  font-family:
+    'Smiley Sans',
+    'Noto Sans SC',
+    'PingFang SC',
+    'Hiragino Sans GB',
+    'Microsoft YaHei',
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--ink-strong);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(1400px 560px at 0% -10%, rgba(131, 204, 255, 0.48), transparent 72%),
+    radial-gradient(1100px 620px at 100% 0%, rgba(255, 214, 169, 0.4), transparent 74%),
+    linear-gradient(180deg, #eef4ff 0%, #f5f8ff 42%, #f7fbff 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

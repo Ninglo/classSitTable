@@ -1,0 +1,2325 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>班级座位安排工具</title>
+  <style>
+    @font-face {
+      font-family: 'Smiley Sans';
+      font-style: normal;
+      font-display: swap;
+      src: url('./SmileySans-Oblique.woff2') format('woff2');
+    }
+
+    * {
+      font-family: 'Smiley Sans', sans-serif;
+    }
+
+    body {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .main-content {
+      display: flex;
+      gap: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .left-section {
+      flex: 7;
+    }
+
+    .right-section {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      max-width: 300px;
+      height: calc(100vh - 120px);
+      /* 减去上下边距 */
+      position: relative;
+      /* 添加相对定位 */
+    }
+
+    .header {
+      font-size: 36px;
+      color: #4a90e2;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 0;
+    }
+
+    .header input {
+      font-family: 'Smiley Sans', sans-serif;
+      font-size: 36px;
+      color: #4a90e2;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      width: 120px;
+      margin-right: -8px;
+      /* 移除右侧间距 */
+    }
+
+    .header input:focus {
+      outline: none;
+      border-bottom: 2px solid #4a90e2;
+    }
+
+    .screen-banner {
+      text-align: center;
+      padding: 12px;
+      background: #e3f2fd;
+      color: #1976d2;
+      font-weight: bold;
+      margin-bottom: 30px;
+      border-radius: 5px;
+      font-size: 18px;
+      letter-spacing: 1px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .classroom {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .table {
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .group-1 {
+      background: #fff3b0;
+    }
+
+    .group-2 {
+      background: #a8d5ff;
+    }
+
+    .group-3 {
+      background: #ffb74d;
+    }
+
+    .group-4 {
+      background: #b3e5fc;
+    }
+
+    .group-5 {
+      background: #c8e6c9;
+    }
+
+    .group-6 {
+      background: #ffd1dc;
+    }
+
+    .table h3 {
+      text-align: center;
+      margin: 0 0 15px 0;
+      color: #2c3e50;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 5px;
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+
+    .seats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .seat {
+      background: white;
+      padding: 8px;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    .seat input {
+      font-family: 'Smiley Sans', sans-serif;
+      width: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      padding: 4px;
+      white-space: nowrap;
+      overflow: visible;
+      text-overflow: unset;
+      min-width: 0;
+    }
+
+    .seat input:focus {
+      outline: none;
+      background: #f8f9fa;
+    }
+
+    .time-display,
+    .location-display {
+      flex: 1;
+      min-width: 300px;
+      font-size: 18px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .time-display {
+      background: #fcfde3;
+    }
+
+    .location-display {
+      background: #f3e5f5;
+    }
+
+    .time-display .emoji,
+    .location-display .emoji {
+      font-size: 32px;
+      margin-right: 15px;
+      flex-shrink: 0;
+      width: 40px;
+      text-align: center;
+    }
+
+    .info-input {
+      border: none;
+      border-bottom: 1px solid #ddd;
+      padding: 5px;
+      margin: 0;
+      font-family: 'Smiley Sans', sans-serif;
+      font-size: 16px;
+      width: 40px;
+      text-align: center;
+      background: transparent;
+    }
+
+    .info-input.wider {
+      width: 80px;
+    }
+
+    .weekday-select,
+    .campus-select {
+      font-family: 'Smiley Sans', sans-serif;
+      font-size: 16px;
+      padding: 5px;
+      border: none;
+      border-radius: 4px;
+      background: white;
+      margin: 0;
+      min-width: 90px;
+    }
+
+    .info-section {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .info-section select {
+      background: transparent;
+    }
+
+    .notes-section {
+      flex: 1;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #4a90e2;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      resize: both;
+      /* 允许水平和垂直方向调整大小 */
+      overflow: auto;
+      /* 添加滚动条 */
+      min-width: 250px;
+      /* 最小宽度 */
+      min-height: 300px;
+      /* 最小高度 */
+      position: absolute;
+      /* 使用绝对定位 */
+      top: 76px;
+      /* 调整顶部位置与左侧 info-section 对齐 */
+      right: 0;
+      left: 0;
+      bottom: 20px;
+    }
+
+    .notes-section img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 10px auto;
+      resize: both;
+      overflow: auto;
+      border: 1px solid #ddd;
+    }
+
+    .notes-toolbar {
+      display: flex;
+      gap: 10px;
+      padding: 5px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      flex-wrap: wrap;
+    }
+
+    .notes-toolbar select,
+    .notes-toolbar button {
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .notes-content {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      overflow-y: auto;
+      background: white;
+      min-height: 100px;
+      /* 添加最小高度 */
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .controls button {
+      font-family: 'Smiley Sans', sans-serif;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s ease;
+    }
+
+    .controls button:hover {
+      background: #45a049;
+    }
+
+    .edit-mode button {
+      background: #2196F3;
+    }
+
+    .edit-mode button:hover {
+      background: #1976D2;
+    }
+
+    /* 班级选择器样式 */
+    .class-selector {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      z-index: 100;
+      max-width: 260px;
+    }
+
+    .class-selector select {
+      font-family: 'Smiley Sans', sans-serif;
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .class-selector .time-toggle {
+      display: flex;
+      gap: 5px;
+    }
+
+    .class-selector .time-toggle button {
+      font-family: 'Smiley Sans', sans-serif;
+      padding: 5px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .class-selector .time-toggle button.active {
+      background: #4a90e2;
+      color: white;
+    }
+
+    .class-selector .delete-btn {
+      padding: 5px 10px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* 保存配置对话框样式 */
+    .save-dialog {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      width: 300px;
+    }
+
+    .save-dialog input {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: 'Smiley Sans', sans-serif;
+    }
+
+    .save-dialog .buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    /* 导入对话框样式 */
+    .import-dialog {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      width: 80%;
+      max-width: 500px;
+    }
+
+    .import-dialog h2 {
+      margin-top: 0;
+      color: #4a90e2;
+    }
+
+    /* 添加布局选择器样式 */
+    .layout-selector {
+      margin: 15px 0;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 5px;
+    }
+
+    .layout-selector label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .layout-selector input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    .layout-option {
+      display: inline-block;
+      margin-right: 20px;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .layout-option:hover {
+      background: #e0e0e0;
+      border-radius: 5px;
+    }
+
+    /* 三横排表格式布局 */
+    .three-rows-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .row-table-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+    }
+
+    .row-label {
+      writing-mode: vertical-lr;
+      text-align: center;
+      font-size: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+      padding: 8px 5px;
+      background: #e8e8e8;
+      border-radius: 6px;
+      letter-spacing: 4px;
+      flex-shrink: 0;
+    }
+
+    .row-table {
+      border-collapse: collapse;
+      /* table 不拉伸，由内容决定宽度 */
+      width: auto;
+    }
+
+    .row-table th {
+      font-size: 13px;
+      font-weight: normal;
+      color: #888;
+      padding: 5px 8px;
+      text-align: center;
+      min-width: 70px;
+    }
+
+    .row-table td {
+      padding: 4px 4px;
+      text-align: center;
+      min-width: 70px;
+    }
+
+    .row-table td input {
+      width: 100%;
+      border: none;
+      background: white;
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .row-table td input:focus {
+      outline: none;
+      background: #f0f0f0;
+    }
+
+    /* 左右分组之间的间隔列 */
+    .row-table .gap-col {
+      min-width: 16px;
+      width: 16px;
+      background: transparent !important;
+      padding: 0;
+    }
+
+    .import-dialog textarea {
+      width: 100%;
+      height: 200px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: 'Smiley Sans', sans-serif;
+      resize: vertical;
+    }
+
+    .import-dialog .buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .import-dialog button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Smiley Sans', sans-serif;
+    }
+
+    .import-dialog .confirm {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .import-dialog .cancel {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .error {
+      color: #f44336;
+      margin-top: 10px;
+    }
+
+    .success {
+      color: #4CAF50;
+      margin-top: 10px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .notes-toolbar .text-align-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    .notes-toolbar .text-align-group button {
+      padding: 4px 8px;
+      background: white;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    .notes-toolbar .text-align-group button.active {
+      background: #4a90e2;
+      color: white;
+    }
+
+    .save-button {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      font-family: 'Smiley Sans', sans-serif;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s ease;
+      z-index: 200;
+    }
+
+    .save-button:hover {
+      background: #45a049;
+    }
+
+    /* 批量导入对话框样式 */
+    .batch-import-dialog {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .batch-import-dialog h2 {
+      margin-top: 0;
+      color: #4a90e2;
+      margin-bottom: 20px;
+    }
+
+    .batch-import-dialog .format-example {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+
+    .batch-import-dialog textarea {
+      width: 100%;
+      height: 300px;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: monospace;
+      resize: vertical;
+    }
+
+    /* 新增的圆弧布局样式 */
+    .arc-layout {
+      .arc-seats {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        flex-wrap: nowrap;
+        width: 100%;
+        gap: 4px;
+        padding: 10px 0;
+      }
+
+      .arc-seat {
+        width: 50px;
+        height: 35px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .arc-seat input {
+        font-family: 'Smiley Sans', sans-serif;
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        text-align: center;
+        padding: 2px;
+        font-size: 12px;
+        outline: none;
+      }
+
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .arc-row {
+      min-height: 120px;
+      padding: 20px;
+      margin-bottom: 20px;
+      background: white;
+      padding: 15px 20px 20px 20px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 140px;
+      overflow: visible;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay" id="overlay"></div>
+  <div class="class-selector isShow">
+    <select id="classSelect" onchange="loadClass()">
+      <option value="">选择班级...</option>
+    </select>
+    <div class="time-toggle">
+      <button onclick="toggleTime('weekday')" id="weekdayBtn" class="active">周中</button>
+      <button onclick="toggleTime('weekend')" id="weekendBtn">周末</button>
+    </div>
+    <button class="delete-btn" onclick="deleteCurrentClass()">删除</button>
+  </div>
+
+  <div class="save-dialog" id="saveDialog">
+    <h2>保存班级配置</h2>
+    <input type="text" id="saveClassName" placeholder="输入班级名称">
+    <div class="buttons">
+      <button class="cancel" onclick="hideSaveDialog()">取消</button>
+      <button class="confirm" onclick="saveClass()">保存</button>
+    </div>
+  </div>
+  <div class="import-dialog" id="importDialog">
+    <h2>导入学生名单</h2>
+    <div class="layout-selector">
+      <label>选择教室布局：</label>
+      <div class="layout-option">
+        <input type="radio" name="layout" value="circular" id="circularLayout" checked>
+        <label for="circularLayout">六张圆桌布局</label>
+      </div>
+      <div class="layout-option">
+        <input type="radio" name="layout" value="rows" id="rowsLayout">
+        <label for="rowsLayout">三横排布局</label>
+      </div>
+      <div class="layout-option">
+        <input type="radio" name="layout" value="arc" id="arcLayout">
+        <label for="arcLayout">圆弧布局</label>
+      </div>
+    </div>
+    <p>请输入学生名单（每行一个名字）：</p>
+    <div id="layoutDescription">
+      <ul style="font-size: 14px; color: #666; margin: 10px 0;">
+        <li>31-36人：6个小组</li>
+        <li>25-30人：5个小组</li>
+        <li>19-24人：4个小组（第1、2、3、5组）</li>
+        <li>1-18人：3个小组（第1、2、3组）</li>
+      </ul>
+    </div>
+    <textarea id="studentNames" placeholder="请输入学生名字，每行一个..."></textarea>
+    <div id="errorMsg"></div>
+    <div class="buttons">
+      <button class="cancel" onclick="hideImportDialog()">取消</button>
+      <button class="confirm" onclick="importStudents()">确认导入</button>
+    </div>
+  </div>
+  <div class="batch-import-dialog" id="batchImportDialog">
+    <h2>批量导入班级配置</h2>
+    <p>请按照以下格式输入数据（使用!作为班级分隔符）：</p>
+    <div class="format-example">班级名称: J328
+      校区: C86校区
+      楼层: 1
+      教室: 101
+
+      周中布局: 圆桌
+      周中时间:
+      月: 9
+      日: 1
+      星期: 星期一
+      时间: 14:30
+
+      Group 1: Jenny, Andy, Rain, Anthony, Mila, Anna王
+      Group 2: Bella, Sunny, David上官, Amy, Anna吴, Rambo
+      Group 3: Leo, Nini, David资文, Jasper, Bonnie, Emily
+      Group 4: Thea, Melody, Shaun, Hardy, Perry
+      Group 5: Aurora, Wayne, Sam, Candy, Poseidon, Tammy
+      Group 6: Ivy, Spring, Alina, Jun, Scarlett
+
+      周末布局: 三排
+      周末时间:
+      月: 9
+      日: 2
+      星期: 星期六
+      时间: 10:30
+
+      Group 1: Jenny, Andy, Rain, Anthony, Mila, Anna王
+      Group 2: Bella, Sunny, David上官, Amy, Anna吴, Rambo
+      Group 3: Leo, Nini, David资文, Jasper, Bonnie, Emily
+      Group 4: Thea, Melody, Shaun, Hardy, Perry
+      Group 5: Aurora, Wayne, Sam, Candy, Poseidon, Tammy
+      Group 6: Ivy, Spring, Alina, Jun, Scarlett
+
+      !
+
+      班级名称: J329
+      校区: 七彩校区
+      楼层: 2
+      教室: 202
+
+      周中布局: 三排
+      周中时间:
+      月: 9
+      日: 1
+      星期: 星期一
+      时间: 14:30
+
+      Group 1: Jenny, Andy, Rain, Anthony, Mila, Anna王
+      Group 2: Bella, Sunny, David上官, Amy, Anna吴, Rambo
+      Group 3: Leo, Nini, David资文, Jasper, Bonnie, Emily
+      Group 4: Thea, Melody, Shaun, Hardy, Perry
+      Group 5: Aurora, Wayne, Sam, Candy, Poseidon, Tammy
+      Group 6: Ivy, Spring, Alina, Jun, Scarlett
+
+      周末布局: 圆桌
+      周末时间:
+      月: 9
+      日: 2
+      星期: 星期六
+      时间: 10:30
+
+      Group 1: Jenny, Andy, Rain, Anthony, Mila, Anna王
+      Group 2: Bella, Sunny, David上官, Amy, Anna吴, Rambo
+      Group 3: Leo, Nini, David资文, Jasper, Bonnie, Emily
+      Group 4: Thea, Melody, Shaun, Hardy, Perry
+      Group 5: Aurora, Wayne, Sam, Candy, Poseidon, Tammy
+      Group 6: Ivy, Spring, Alina, Jun, Scarlett</div>
+    <textarea id="batchImportData" placeholder="在此输入数据..."></textarea>
+    <div id="batchImportError" class="error"></div>
+    <div class="buttons">
+      <button class="cancel" onclick="hideBatchImportDialog()">取消</button>
+      <button class="confirm" onclick="processBatchImport()">确认导入</button>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="left-section">
+      <div class="header">
+        <input type="text" id="headerClassName" value="J328" placeholder="XXXX" maxlength="4">班座位表
+      </div>
+      <div class="info-section">
+        <div class="time-display">
+          <span class="emoji">⏰</span>
+          <input type="text" class="info-input" id="date" placeholder="月">月
+          <input type="text" class="info-input" id="day" placeholder="日">日
+          <select class="weekday-select" id="weekday">
+            <option value="">选择星期</option>
+            <option value="星期一">星期一</option>
+            <option value="星期二">星期二</option>
+            <option value="星期三">星期三</option>
+            <option value="星期四">星期四</option>
+            <option value="星期五">星期五</option>
+            <option value="星期六">星期六</option>
+            <option value="星期日">星期日</option>
+          </select>
+          <input type="text" class="info-input wider" id="time" placeholder="时间">
+        </div>
+        <div class="location-display">
+          <span class="emoji">🏫</span>
+          <select class="campus-select" id="campus">
+            <option value="">选择校区</option>
+            <option value="C86校区">C86校区</option>
+            <option value="七彩校区">七彩校区</option>
+          </select>
+          <input type="text" class="info-input" id="floor" placeholder="楼">楼
+          <input type="text" class="info-input wider" id="room" placeholder="教室">
+        </div>
+      </div>
+      <div class="screen-banner">屏幕 & 白板</div>
+      <div class="classroom" id="classroom"></div>
+    </div>
+    <div class="right-section">
+      <div class="notes-section">
+        <div class="notes-toolbar isShow">
+          <select id="noteFontSize">
+            <option value="12">12px</option>
+            <option value="14">14px</option>
+            <option value="16" selected>16px</option>
+            <option value="18">18px</option>
+            <option value="20">20px</option>
+            <option value="24">24px</option>
+          </select>
+          <input type="color" id="noteColor" value="#000000">
+          <div class="text-align-group">
+            <button onclick="setTextAlign('left')" title="左对齐"><i>⬅️</i></button>
+            <button onclick="setTextAlign('center')" title="居中对齐"><i>⬆️</i></button>
+            <button onclick="setTextAlign('right')" title="右对齐"><i>➡️</i></button>
+          </div>
+          <div class="text-align-group">
+            <button onclick="setVerticalAlign('top')" title="顶部对齐"><i>⬆️</i></button>
+            <button onclick="setVerticalAlign('middle')" title="垂直居中"><i>↕️</i></button>
+            <button onclick="setVerticalAlign('bottom')" title="底部对齐"><i>⬇️</i></button>
+          </div>
+        </div>
+        <div class="notes-content" id="notes" contenteditable="true" placeholder="在此添加备注内容..."></div>
+      </div>
+    </div>
+  </div>
+  <button class="save-button isShow" onclick="showSaveDialog()">保存配置</button>
+  <div class="controls isShow">
+    <button onclick="showBatchImportDialog()">批量导入</button>
+    <button onclick="showImportDialog()">导入名单</button>
+    <div class="edit-mode">
+      <button onclick="toggleEditMode()">编辑模式</button>
+    </div>
+    <button onclick="toggleLayout()">切换布局</button>
+    <button onclick="generateSeating()">下一次轮换</button>
+    <button onclick="">按F2清除UI</button>
+  </div>
+  <script>
+    document.addEventListener('keydown', function (event) {
+      var isShowStyle = document.querySelector('.isShow');
+
+      if (event.key === 'F2' || event.keyCode === 131) {
+        if (isShowStyle.style.display == 'none') {
+          document.querySelectorAll('.isShow').forEach(element => {
+            element.style.display = '';
+          });
+        } else {
+          document.querySelectorAll('.isShow').forEach(element => {
+            element.style.display = 'none';
+          });
+        }
+      }
+    });
+    let isEditMode = false;
+    let currentArrangement = 0;
+    let currentTimeMode = 'weekday';
+    let currentLayout = 'circular'; // 新增：当前布局类型
+    let groups = Array(6).fill().map(() => Array(6).fill('')); // 圆桌布局的组
+    let rowGroups = { // 新增：三横排布局的组
+      rows: Array(3).fill().map(() => ({
+        left: Array(7).fill(''),
+        right: Array(7).fill('')
+      })),
+      // colorOrder[i] 表示第 i 个小组位置(0=第一排左,1=第一排右,2=第二排左,...) 对应的颜色编号(1~6)
+      colorOrder: [1, 2, 3, 4, 5, 6]
+    };
+    let arcGroups = { // 新增：圆弧布局，两排，每排18个
+      rows: [Array(18).fill(''), Array(18).fill('')]
+    };
+
+    // 获取有学生的组的索引列表
+    function getActiveGroupIndices() {
+      const indices = [];
+      for (let i = 0; i < 6; i++) {
+        if (groups[i].some(name => name !== '')) {
+          indices.push(i);
+        }
+      }
+      return indices.length > 0 ? indices : [0]; // 至少返回一个
+    }
+
+    // 根据当前轮换次数，获取每个物理位置应该显示哪个组
+    // 返回长度为6的数组，mapping[物理位置] = 组索引
+    function getRotationMapping() {
+      const activeIndices = getActiveGroupIndices();
+      const n = activeIndices.length;
+      const shift = currentArrangement % n;
+
+      // 构建物理位置到组的映射（6个位置）
+      const mapping = Array(6).fill(-1);
+
+      // 活跃组在固定的物理位置之间轮换
+      // 例如4组时：物理位置 [0,1,2,4]，组数据 [0,1,2,4]
+      // shift=1时：位置0放组4，位置1放组0，位置2放组1，位置4放组2
+      for (let i = 0; i < n; i++) {
+        const physicalPos = activeIndices[i];
+        const groupIdx = activeIndices[(i - shift + n) % n];
+        mapping[physicalPos] = groupIdx;
+      }
+
+      // 非活跃位置显示对应的空组数据
+      for (let pos = 0; pos < 6; pos++) {
+        if (mapping[pos] === -1) {
+          mapping[pos] = pos;
+        }
+      }
+
+      return mapping;
+    }
+
+    // 保存所有班级的数据
+    let classData = {};
+
+    // 获取时间和地点信息
+    function getLocationInfo() {
+      return {
+        date: document.getElementById('date').value,
+        day: document.getElementById('day').value,
+        weekday: document.getElementById('weekday').value,
+        time: document.getElementById('time').value,
+        campus: document.getElementById('campus').value,
+        floor: document.getElementById('floor').value,
+        room: document.getElementById('room').value,
+        notes: document.getElementById('notes').innerHTML
+      };
+    }
+
+    // 设置时间和地点信息
+    function setLocationInfo(info) {
+      if (!info) return;
+      document.getElementById('date').value = info.date || '';
+      document.getElementById('day').value = info.day || '';
+      document.getElementById('weekday').value = info.weekday || '';
+      document.getElementById('time').value = info.time || '';
+      document.getElementById('campus').value = info.campus || '';
+      document.getElementById('floor').value = info.floor || '';
+      document.getElementById('room').value = info.room || '';
+      document.getElementById('notes').innerHTML = info.notes || '';
+    }
+
+    // 从localStorage加载数据
+    function loadSavedData() {
+      const saved = localStorage.getItem('classSeatingData');
+      if (saved) {
+        classData = JSON.parse(saved);
+        updateClassSelect();
+      }
+    }
+
+    // 更新班级选择下拉框
+    function updateClassSelect() {
+      const select = document.getElementById('classSelect');
+      select.innerHTML = '<option value="">选择班级...</option>';
+      Object.keys(classData).forEach(className => {
+        const option = document.createElement('option');
+        option.value = className;
+        option.textContent = className;
+        select.appendChild(option);
+      });
+    }
+
+    // 切换时间模式（周中/周末）
+    function toggleTime(mode) {
+      currentTimeMode = mode;
+      document.getElementById('weekdayBtn').className = mode === 'weekday' ? 'active' : '';
+      document.getElementById('weekendBtn').className = mode === 'weekend' ? 'active' : '';
+      loadClass();
+    }
+
+    // 显示保存对话框
+    function showSaveDialog() {
+      const headerClassName = document.getElementById('headerClassName').value;
+      document.getElementById('saveClassName').value = headerClassName;
+      document.getElementById('saveDialog').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+    }
+
+    // 隐藏保存对话框
+    function hideSaveDialog() {
+      document.getElementById('saveDialog').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    // 保存当前配置
+    function saveClass() {
+      const className = document.getElementById('saveClassName').value.trim();
+      if (!className) {
+        alert('请输入班级名称');
+        return;
+      }
+
+      // 保存当前配置
+      if (!classData[className]) {
+        classData[className] = {
+          weekday: {
+            layout: currentLayout,
+            groups: null,
+            rowGroups: null,
+            currentArrangement: 0,
+            locationInfo: {}
+          },
+          weekend: {
+            layout: currentLayout,
+            groups: null,
+            rowGroups: null,
+            currentArrangement: 0,
+            locationInfo: {}
+          }
+        };
+      }
+
+      classData[className][currentTimeMode] = {
+        layout: currentLayout,
+        groups: currentLayout === 'circular' ? JSON.parse(JSON.stringify(groups)) : null,
+        rowGroups: currentLayout === 'rows' ? JSON.parse(JSON.stringify(rowGroups)) : null,
+        arcGroups: currentLayout === 'arc' ? JSON.parse(JSON.stringify(arcGroups)) : null,
+        currentArrangement: currentArrangement,
+        locationInfo: getLocationInfo()
+      };
+
+      // 保存到localStorage
+      localStorage.setItem('classSeatingData', JSON.stringify(classData));
+
+      // 更新选择框和标题
+      updateClassSelect();
+      document.getElementById('classSelect').value = className;
+      document.getElementById('headerClassName').value = className;
+
+      hideSaveDialog();
+    }
+
+    // 加载选中的班级
+    function loadClass() {
+      const className = document.getElementById('classSelect').value;
+      if (className && classData[className] && classData[className][currentTimeMode]) {
+        const data = classData[className][currentTimeMode];
+
+        // 先设置布局类型
+        currentLayout = data.layout || 'circular';
+
+        // 根据布局类型初始化数据结构
+        if (currentLayout === 'circular') {
+          groups = JSON.parse(JSON.stringify(data.groups || Array(6).fill().map(() => Array(6).fill(''))));
+          // 重置其他布局数据
+          rowGroups = {
+            rows: Array(3).fill().map(() => ({
+              left: Array(7).fill(''),
+              right: Array(7).fill('')
+            })),
+            colorOrder: [1, 2, 3, 4, 5, 6]
+          };
+          arcGroups = {
+            rows: [Array(18).fill(''), Array(18).fill('')]
+          };
+        } else if (currentLayout === 'rows') {
+          rowGroups = JSON.parse(JSON.stringify(data.rowGroups || {
+            rows: Array(3).fill().map(() => ({
+              left: Array(7).fill(''),
+              right: Array(7).fill('')
+            }))
+          }));
+          // 兼容旧数据：如果没有 colorOrder，补上默认值
+          if (!rowGroups.colorOrder) rowGroups.colorOrder = [1, 2, 3, 4, 5, 6];
+          // 重置其他布局数据
+          groups = Array(6).fill().map(() => Array(6).fill(''));
+          arcGroups = {
+            rows: [Array(18).fill(''), Array(18).fill('')]
+          };
+        } else if (currentLayout === 'arc') {
+          arcGroups = JSON.parse(JSON.stringify(data.arcGroups || {
+            rows: [Array(18).fill(''), Array(18).fill('')]
+          }));
+          // 重置其他布局数据
+          groups = Array(6).fill().map(() => Array(6).fill(''));
+          rowGroups = {
+            rows: Array(3).fill().map(() => ({
+              left: Array(7).fill(''),
+              right: Array(7).fill('')
+            })),
+            colorOrder: [1, 2, 3, 4, 5, 6]
+          };
+        }
+
+        currentArrangement = data.currentArrangement || 0;
+        setLocationInfo(data.locationInfo || {});
+        document.getElementById('headerClassName').value = className;
+
+        // 重置教室容器的样式
+        const classroom = document.getElementById('classroom');
+        classroom.className = 'classroom';
+        if (currentLayout === 'rows') {
+          classroom.classList.add('three-rows-layout');
+        } else if (currentLayout === 'arc') {
+          classroom.classList.add('arc-layout');
+        }
+
+        // 刷新座位显示
+        refreshSeating();
+      } else {
+        // 如果没有数据，重置为默认状态
+        currentLayout = 'circular';
+        groups = Array(6).fill().map(() => Array(6).fill(''));
+        rowGroups = {
+          rows: Array(3).fill().map(() => ({
+            left: Array(7).fill(''),
+            right: Array(7).fill('')
+          })),
+          colorOrder: [1, 2, 3, 4, 5, 6]
+        };
+        arcGroups = {
+          rows: [Array(18).fill(''), Array(18).fill('')]
+        };
+        currentArrangement = 0;
+        setLocationInfo({});
+        document.getElementById('headerClassName').value = className || '';
+
+        // 重置教室容器的样式
+        const classroom = document.getElementById('classroom');
+        classroom.className = 'classroom';
+
+        refreshSeating();
+      }
+    }
+
+    // 删除当前班级
+    function deleteCurrentClass() {
+      const className = document.getElementById('classSelect').value;
+      if (className && confirm(`确定要删除 ${className} 的所有配置吗？`)) {
+        delete classData[className];
+        localStorage.setItem('classSeatingData', JSON.stringify(classData));
+        updateClassSelect();
+        document.getElementById('headerClassName').value = '';
+        groups = Array(6).fill().map(() => Array(6).fill(''));
+        currentArrangement = 0;
+        setLocationInfo({});
+        refreshSeating();
+      }
+    }
+
+    // 添加缺失的函数
+    function showImportDialog() {
+      document.getElementById('importDialog').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('errorMsg').textContent = '';
+      document.getElementById('errorMsg').className = '';
+      document.getElementById('studentNames').value = '';
+    }
+
+    function hideImportDialog() {
+      document.getElementById('importDialog').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    function importStudents() {
+      const input = document.getElementById('studentNames').value;
+      const newNames = input.split('\n')
+        .map(name => name.trim())
+        .filter(name => name.length > 0);
+      const totalStudents = newNames.length;
+      const isCircular = document.getElementById('circularLayout').checked;
+      const isRows = document.getElementById('rowsLayout').checked;
+      const isArc = document.getElementById('arcLayout').checked;
+
+      if (isCircular) {
+        importCircularLayout(newNames, totalStudents);
+      } else if (isRows) {
+        importRowLayout(newNames, totalStudents);
+      } else if (isArc) {
+        importArcLayout(input);
+      }
+    }
+
+    // 根据总人数计算需要多少组
+    function calcNumGroups(totalStudents) {
+      if (totalStudents >= 31) return 6;
+      if (totalStudents >= 25) return 5;
+      if (totalStudents >= 19) return 4;
+      return 3; // 0-18人用3组
+    }
+
+    // 获取指定组数下实际使用的组索引
+    // 4组时用 [0,1,2,4]（第1,2,3,5组），其他按顺序
+    function getGroupIndicesForCount(numGroups) {
+      if (numGroups === 4) return [0, 1, 2, 4];
+      const indices = [];
+      for (let i = 0; i < numGroups; i++) indices.push(i);
+      return indices;
+    }
+
+    function importCircularLayout(newNames, totalStudents) {
+      if (totalStudents > 36) {
+        showError(`学生人数不能超过36人，当前输入了${totalStudents}个名字`);
+        return;
+      }
+
+      if (totalStudents === 0) {
+        showError('请输入至少一个学生名字');
+        return;
+      }
+
+      const numGroups = calcNumGroups(totalStudents);
+      const groupIndices = getGroupIndicesForCount(numGroups);
+      const baseStudentsPerGroup = Math.floor(totalStudents / numGroups);
+      const extraStudents = totalStudents % numGroups;
+
+      groups = Array(6).fill().map(() => Array(6).fill(''));
+      let currentStudent = 0;
+
+      for (let i = 0; i < numGroups; i++) {
+        const groupIdx = groupIndices[i];
+        const studentsInThisGroup = i < extraStudents ?
+          baseStudentsPerGroup + 1 :
+          baseStudentsPerGroup;
+
+        for (let j = 0; j < studentsInThisGroup; j++) {
+          if (currentStudent < newNames.length) {
+            groups[groupIdx][j] = newNames[currentStudent];
+            currentStudent++;
+          }
+        }
+      }
+
+      currentLayout = 'circular';
+      currentArrangement = 0;
+      saveAndRefresh(`成功导入${totalStudents}名学生，已均衡分配到${numGroups}个小组`);
+    }
+
+    function importRowLayout(newNames, totalStudents) {
+      if (totalStudents === 0) {
+        showError('请输入至少一个学生名字');
+        return;
+      }
+
+      if (totalStudents > 42) {
+        showError(`三横排布局最多支持42人（每排14人），当前输入了${totalStudents}个名字`);
+        return;
+      }
+
+      // 计算每排人数
+      const studentsPerRow = Math.ceil(totalStudents / 3);
+      let remainingStudents = totalStudents;
+
+      rowGroups.rows = Array(3).fill().map(() => ({
+        left: Array(7).fill(''),
+        right: Array(7).fill('')
+      }));
+      rowGroups.colorOrder = [1, 2, 3, 4, 5, 6];
+
+      let currentStudent = 0;
+
+      // 为每一排分配学生
+      for (let row = 0; row < 3; row++) {
+        const thisRowStudents = Math.min(studentsPerRow, remainingStudents);
+        const leftGroupSize = Math.ceil(thisRowStudents / 2);
+        const rightGroupSize = thisRowStudents - leftGroupSize;
+
+        // 分配左边小组
+        for (let i = 0; i < leftGroupSize && currentStudent < newNames.length; i++) {
+          rowGroups.rows[row].left[i] = newNames[currentStudent++];
+        }
+
+        // 分配右边小组
+        for (let i = 0; i < rightGroupSize && currentStudent < newNames.length; i++) {
+          rowGroups.rows[row].right[i] = newNames[currentStudent++];
+        }
+
+        remainingStudents -= thisRowStudents;
+      }
+
+      currentLayout = 'rows';
+      currentArrangement = 0;
+      saveAndRefresh(`成功导入${totalStudents}名学生，已均衡分配到三排`);
+    }
+
+    function importArcLayout(rawInput) {
+      // 支持以下格式：
+      // 1) 第一排: a,b,c\n第二排: d,e,f（支持中文逗号）
+      // 2) 两行无标签：第一行=第一排，第二行=第二排
+      const lines = rawInput.split('\n').map(l => l.trim()).filter(l => l);
+      let first = [];
+      let second = [];
+
+      const splitNames = (text) => text
+        .split(/[,，]/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      const firstLine = lines[0] || '';
+      const secondLine = lines[1] || '';
+
+      if (firstLine.startsWith('第一排')) {
+        const part = firstLine.substring(firstLine.indexOf(':') + 1);
+        first = splitNames(part);
+      } else if (firstLine) {
+        first = splitNames(firstLine);
+      }
+
+      if (secondLine.startsWith('第二排')) {
+        const part = secondLine.substring(secondLine.indexOf(':') + 1);
+        second = splitNames(part);
+      } else if (secondLine) {
+        second = splitNames(secondLine);
+      }
+
+      const total = first.length + second.length;
+      if (total > 36) {
+        showError(`圆弧布局最多支持36人（每排最多18人），当前输入了${total}人`);
+        return;
+      }
+
+      arcGroups.rows = [Array(18).fill(''), Array(18).fill('')];
+      placeCentered(arcGroups.rows[0], first);
+      placeCentered(arcGroups.rows[1], second);
+
+      currentLayout = 'arc';
+      currentArrangement = 0;
+      saveAndRefresh(`成功导入圆弧布局，共${total}人`);
+    }
+
+    function placeCentered(targetArray, names) {
+      // 居中摆放：从中间索引开始，左右交替扩展
+      const width = targetArray.length; // 18
+      let centerLeft = Math.floor((width - 1) / 2); // 8
+      let centerRight = centerLeft + 1; // 9
+      let useLeft = true;
+      let idx = 0;
+      while (idx < names.length && (centerLeft >= 0 || centerRight < width)) {
+        if (useLeft && centerLeft >= 0) {
+          targetArray[centerLeft--] = names[idx++];
+        } else if (!useLeft && centerRight < width) {
+          targetArray[centerRight++] = names[idx++];
+        }
+        useLeft = !useLeft;
+      }
+    }
+
+    function showError(message) {
+      document.getElementById('errorMsg').textContent = message;
+      document.getElementById('errorMsg').className = 'error';
+    }
+
+    function saveAndRefresh(message) {
+      hideImportDialog();
+      refreshSeating();
+
+      const className = document.getElementById('classSelect').value;
+      if (className) {
+        if (!classData[className]) {
+          classData[className] = {
+            weekday: {
+              layout: currentLayout,
+              groups: null,
+              rowGroups: null,
+              currentArrangement: 0,
+              locationInfo: {}
+            },
+            weekend: {
+              layout: currentLayout,
+              groups: null,
+              rowGroups: null,
+              currentArrangement: 0,
+              locationInfo: {}
+            }
+          };
+        }
+
+        classData[className][currentTimeMode] = {
+          layout: currentLayout,
+          groups: currentLayout === 'circular' ? JSON.parse(JSON.stringify(groups)) : null,
+          rowGroups: currentLayout === 'rows' ? JSON.parse(JSON.stringify(rowGroups)) : null,
+          arcGroups: currentLayout === 'arc' ? JSON.parse(JSON.stringify(arcGroups)) : null,
+          currentArrangement: currentArrangement,
+          locationInfo: getLocationInfo()
+        };
+
+        localStorage.setItem('classSeatingData', JSON.stringify(classData));
+      }
+
+      document.getElementById('errorMsg').textContent = message;
+      document.getElementById('errorMsg').className = 'success';
+      setTimeout(() => {
+        document.getElementById('errorMsg').textContent = '';
+        document.getElementById('errorMsg').className = '';
+      }, 3000);
+    }
+
+    function rotateGroupInternally(group) {
+      // 过滤出非空的学生名字
+      const nonEmptyStudents = group.filter(name => name !== '');
+      const emptyCount = group.length - nonEmptyStudents.length;
+
+      // 如果没有学生或只有一个学生，直接返回原数组
+      if (nonEmptyStudents.length <= 1) {
+        return group;
+      }
+
+      // 轮转非空学生名字
+      const firstStudent = nonEmptyStudents[0];
+      const rotatedStudents = [...nonEmptyStudents.slice(1), firstStudent];
+
+      // 在末尾添加空位
+      return [...rotatedStudents, ...Array(emptyCount).fill('')];
+    }
+
+    function handleSeatChange(groupIndex, seatIndex, value) {
+      if (isEditMode) {
+        groups[groupIndex][seatIndex] = value;
+      }
+    }
+
+    function rotateRowGroups() {
+      // 对每一排的左右小组分别进行组内轮转
+      rowGroups.rows.forEach(row => {
+        // 轮转左边小组
+        const leftNonEmpty = row.left.filter(name => name !== '');
+        if (leftNonEmpty.length > 1) {
+          const rotatedLeft = [...leftNonEmpty.slice(1), leftNonEmpty[0]];
+          row.left = [...rotatedLeft, ...Array(7 - rotatedLeft.length).fill('')];
+        }
+
+        // 轮转右边小组
+        const rightNonEmpty = row.right.filter(name => name !== '');
+        if (rightNonEmpty.length > 1) {
+          const rotatedRight = [...rightNonEmpty.slice(1), rightNonEmpty[0]];
+          row.right = [...rotatedRight, ...Array(7 - rotatedRight.length).fill('')];
+        }
+      });
+
+      // 轮转排的顺序（行数据和颜色一起轮转）
+      const temp = rowGroups.rows[0];
+      rowGroups.rows[0] = rowGroups.rows[1];
+      rowGroups.rows[1] = rowGroups.rows[2];
+      rowGroups.rows[2] = temp;
+
+      // 颜色也跟着转：6个位置按左右排列 [第1排左, 第1排右, 第2排左, 第2排右, 第3排左, 第3排右]
+      // 排轮转时：第1排→第3排, 第2排→第1排, 第3排→第2排
+      const c = rowGroups.colorOrder;
+      rowGroups.colorOrder = [c[2], c[3], c[4], c[5], c[0], c[1]];
+    }
+
+    function refreshSeating() {
+      const classroom = document.getElementById('classroom');
+      classroom.innerHTML = '';
+
+      if (currentLayout === 'circular') {
+        refreshCircularSeating();
+      } else if (currentLayout === 'rows') {
+        classroom.className = 'classroom three-rows-layout';
+        refreshRowSeating();
+      } else if (currentLayout === 'arc') {
+        classroom.className = 'classroom arc-layout';
+        refreshArcSeating();
+      }
+    }
+
+    function refreshCircularSeating() {
+      const classroom = document.getElementById('classroom');
+      const mapping = getRotationMapping();
+
+      for (let tableIndex = 0; tableIndex < 6; tableIndex++) {
+        const groupIndex = mapping[tableIndex];
+
+        const table = document.createElement('div');
+        table.className = `table group-${groupIndex + 1}`;
+
+        // 计算这个组中最长名字的长度
+        const maxNameLength = Math.max(...groups[groupIndex].filter(name => name).map(name => name.length), 1);
+        // 根据最长名字的长度动态计算字体大小
+        const fontSize = Math.min(16, Math.max(10, Math.floor(140 / maxNameLength)));
+
+        let tableHtml = `<h3>Group ${tableIndex + 1}</h3>`;
+        tableHtml += '<div class="seats">';
+
+        for (let seatIndex = 0; seatIndex < 6; seatIndex++) {
+          const student = groups[groupIndex][seatIndex] || '';
+          tableHtml += `
+                        <div class="seat">
+                            <input type="text"
+                                value="${student}"
+                                style="font-size: ${fontSize}px"
+                                ${!isEditMode ? 'readonly' : ''}
+                                onchange="handleSeatChange(${groupIndex}, ${seatIndex}, this.value)"
+                            >
+                        </div>
+                    `;
+        }
+
+        tableHtml += '</div>';
+        table.innerHTML = tableHtml;
+        classroom.appendChild(table);
+      }
+    }
+
+    function refreshRowSeating() {
+      const classroom = document.getElementById('classroom');
+      classroom.className = 'classroom three-rows-layout';
+
+      const rowNames = ['第一排', '第二排', '第三排'];
+
+      // 6种组背景色（和圆桌一致）
+      const groupColors = {
+        1: '#fff3b0', 2: '#a8d5ff', 3: '#ffb74d',
+        4: '#b3e5fc', 5: '#c8e6c9', 6: '#ffd1dc'
+      };
+
+      // 确保 colorOrder 存在
+      if (!rowGroups.colorOrder) rowGroups.colorOrder = [1, 2, 3, 4, 5, 6];
+
+      rowGroups.rows.forEach((row, rowIndex) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'row-table-wrapper';
+
+        // 左侧"第X排"标签
+        const label = document.createElement('div');
+        label.className = 'row-label';
+        label.textContent = rowNames[rowIndex];
+        wrapper.appendChild(label);
+
+        // 统计左右非空座位
+        const leftStudents = row.left.filter(s => s);
+        const rightStudents = row.right.filter(s => s);
+        const leftCount = leftStudents.length;
+        const rightCount = rightStudents.length;
+
+        // 获取颜色
+        const leftColorId = rowGroups.colorOrder[rowIndex * 2];
+        const rightColorId = rowGroups.colorOrder[rowIndex * 2 + 1];
+        const leftBg = groupColors[leftColorId] || '#f5f5f5';
+        const rightBg = groupColors[rightColorId] || '#f5f5f5';
+
+        // 构建表格
+        const table = document.createElement('table');
+        table.className = 'row-table';
+
+        // 表头行：左1 左2 ... | 间隔 | 右N 右N-1 ... 右1
+        let headerHtml = '<tr>';
+        for (let i = 0; i < leftCount; i++) {
+          headerHtml += `<th style="background:${leftBg}">左${i + 1}</th>`;
+        }
+        headerHtml += '<th class="gap-col"></th>';
+        for (let i = rightCount; i >= 1; i--) {
+          headerHtml += `<th style="background:${rightBg}">右${i}</th>`;
+        }
+        headerHtml += '</tr>';
+
+        // 内容行：学生名字
+        let bodyHtml = '<tr>';
+        row.left.forEach((student, seatIndex) => {
+          if (student) {
+            bodyHtml += `<td style="background:${leftBg}">
+              <input type="text" value="${student}"
+                ${!isEditMode ? 'readonly' : ''}
+                onchange="handleRowSeatChange(${rowIndex}, 'left', ${seatIndex}, this.value)">
+            </td>`;
+          }
+        });
+        bodyHtml += '<td class="gap-col"></td>';
+        row.right.forEach((student, seatIndex) => {
+          if (student) {
+            bodyHtml += `<td style="background:${rightBg}">
+              <input type="text" value="${student}"
+                ${!isEditMode ? 'readonly' : ''}
+                onchange="handleRowSeatChange(${rowIndex}, 'right', ${seatIndex}, this.value)">
+            </td>`;
+          }
+        });
+        bodyHtml += '</tr>';
+
+        table.innerHTML = headerHtml + bodyHtml;
+        wrapper.appendChild(table);
+        classroom.appendChild(wrapper);
+      });
+    }
+
+    function refreshArcSeating() {
+      const classroom = document.getElementById('classroom');
+
+      const colors = ['#fff3b0', '#a8d5ff'];
+
+      arcGroups.rows.forEach((row, rowIndex) => {
+        const rowElement = document.createElement('div');
+        rowElement.className = 'arc-row';
+        rowElement.style.background = colors[rowIndex % colors.length];
+
+        const seats = document.createElement('div');
+        seats.className = 'arc-seats';
+
+        const maxNameLength = Math.max(...row.filter(name => name).map(name => name.length), 1);
+        const baseFontSize = Math.min(16, Math.max(12, Math.floor(140 / maxNameLength)));
+
+        const n = row.length; // 18
+        const center = (n - 1) / 2; // 8.5
+        const maxOffset = 20; // 弧形高度
+
+        for (let i = 0; i < row.length; i++) {
+          const student = row[i] || '';
+          const seat = document.createElement('div');
+          seat.className = 'seat arc-seat';
+
+          // 从底部基线开始，中间向上凸起形成弧形
+          const distanceFromCenter = Math.abs(i - center);
+          const radius = center; // 半圆半径
+          const upwardOffset = distanceFromCenter <= radius ? Math.round(Math.sqrt(radius * radius -
+            distanceFromCenter * distanceFromCenter) * (maxOffset / radius)) : 0;
+          seat.style.marginBottom = upwardOffset + 'px';
+          seat.style.display = 'inline-block';
+          seat.style.verticalAlign = 'bottom';
+
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = student;
+          input.style.fontSize = baseFontSize + 'px';
+          if (!isEditMode) input.setAttribute('readonly', 'readonly');
+          input.onchange = (e) => handleArcSeatChange(rowIndex, i, e.target.value);
+          seat.appendChild(input);
+          seats.appendChild(seat);
+        }
+
+        rowElement.appendChild(seats);
+        classroom.appendChild(rowElement);
+      });
+    }
+
+    function handleRowSeatChange(rowIndex, side, seatIndex, value) {
+      if (isEditMode) {
+        rowGroups.rows[rowIndex][side][seatIndex] = value;
+      }
+    }
+
+    function handleArcSeatChange(rowIndex, seatIndex, value) {
+      if (isEditMode) {
+        arcGroups.rows[rowIndex][seatIndex] = value;
+      }
+    }
+
+    function rotateArcLayout() {
+      // 对每排的学生进行内部轮换（第一个移到最后）
+      arcGroups.rows.forEach((row, rowIndex) => {
+        const nonEmpty = row.filter(name => name !== '');
+        if (nonEmpty.length > 1) {
+          const rotated = [...nonEmpty.slice(1), nonEmpty[0]];
+          const newRow = Array(18).fill('');
+          placeCentered(newRow, rotated);
+          arcGroups.rows[rowIndex] = newRow;
+        }
+      });
+    }
+
+    function generateSeating() {
+      if (isEditMode) {
+        refreshSeating();
+        return;
+      }
+
+      if (currentLayout === 'circular') {
+        const newGroups = groups.map(group => [...group]);
+        for (let i = 0; i < newGroups.length; i++) {
+          newGroups[i] = rotateGroupInternally(newGroups[i]);
+        }
+        groups = newGroups;
+      } else if (currentLayout === 'rows') {
+        rotateRowGroups();
+      } else if (currentLayout === 'arc') {
+        rotateArcLayout();
+      }
+
+      const activeCount = getActiveGroupIndices().length;
+      currentArrangement = (currentArrangement + 1) % activeCount;
+      refreshSeating();
+
+      // 保存更新
+      const className = document.getElementById('classSelect').value;
+      if (className && classData[className]) {
+        classData[className][currentTimeMode] = {
+          layout: currentLayout,
+          groups: currentLayout === 'circular' ? JSON.parse(JSON.stringify(groups)) : null,
+          rowGroups: currentLayout === 'rows' ? JSON.parse(JSON.stringify(rowGroups)) : null,
+          arcGroups: currentLayout === 'arc' ? JSON.parse(JSON.stringify(arcGroups)) : null,
+          currentArrangement: currentArrangement,
+          locationInfo: getLocationInfo()
+        };
+        localStorage.setItem('classSeatingData', JSON.stringify(classData));
+      }
+    }
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const editButton = document.querySelector('.edit-mode button');
+      editButton.textContent = isEditMode ? '退出编辑' : '编辑模式';
+      editButton.style.background = isEditMode ? '#f44336' : '#2196F3';
+      refreshSeating();
+    }
+
+    // 文本对齐功能
+    function setTextAlign(align) {
+      document.execCommand('justify' + align.charAt(0).toUpperCase() + align.slice(1), false, null);
+      updateAlignButtons();
+    }
+
+    function setVerticalAlign(align) {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const selectedElement = range.commonAncestorContainer;
+
+      if (selectedElement.nodeType === 3) { // 文本节点
+        const span = document.createElement('span');
+        span.style.verticalAlign = align;
+        range.surroundContents(span);
+      } else if (selectedElement.nodeType === 1) { // 元素节点
+        selectedElement.style.verticalAlign = align;
+      }
+
+      updateAlignButtons();
+    }
+
+    function updateAlignButtons() {
+      const buttons = document.querySelectorAll('.text-align-group button');
+      buttons.forEach(button => button.classList.remove('active'));
+
+      // 获取当前选中文本的对齐方式
+      const alignment = document.queryCommandState('justifyLeft') ? 'left' :
+        document.queryCommandState('justifyCenter') ? 'center' :
+        document.queryCommandState('justifyRight') ? 'right' : '';
+
+      if (alignment) {
+        const activeButton = document.querySelector(`[onclick*="setTextAlign('${alignment}')"]`);
+        if (activeButton) activeButton.classList.add('active');
+      }
+    }
+
+    // 处理图片粘贴
+    document.getElementById('notes').addEventListener('paste', function (e) {
+      e.preventDefault();
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+
+      for (let item of items) {
+        if (item.type.indexOf('image') === 0) {
+          const blob = item.getAsFile();
+          const reader = new FileReader();
+
+          reader.onload = function (event) {
+            const img = document.createElement('img');
+            img.src = event.target.result;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.resize = 'both';
+            img.style.overflow = 'auto';
+            img.style.border = '1px solid #ddd';
+            img.style.margin = '10px auto';
+            img.style.display = 'block';
+
+            // 使图片可调整大小
+            img.addEventListener('mousedown', function (e) {
+              if (e.target.style.resize === 'both') {
+                e.target.contentEditable = true;
+              }
+            });
+
+            document.getElementById('notes').appendChild(img);
+          };
+          reader.readAsDataURL(blob);
+        } else if (item.type === 'text/plain') {
+          item.getAsString(function (text) {
+            document.execCommand('insertText', false, text);
+          });
+        }
+      }
+    });
+
+    function updateTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      if (document.getElementById('time').value === '') {
+        document.getElementById('time').value = `${hours}:${minutes}`;
+      }
+    }
+
+    // 监听布局选择变化
+    document.getElementById('circularLayout').addEventListener('change', updateLayoutDescription);
+    document.getElementById('rowsLayout').addEventListener('change', updateLayoutDescription);
+    document.getElementById('arcLayout').addEventListener('change', updateLayoutDescription);
+
+    function updateLayoutDescription() {
+      const layoutDesc = document.getElementById('layoutDescription');
+      const isCircular = document.getElementById('circularLayout').checked;
+      const isRows = document.getElementById('rowsLayout').checked;
+      const isArc = document.getElementById('arcLayout').checked;
+
+      if (isCircular) {
+        layoutDesc.innerHTML = `
+                    <ul style="font-size: 14px; color: #666; margin: 10px 0;">
+                        <li>31-36人：6个小组</li>
+                        <li>25-30人：5个小组</li>
+                        <li>19-24人：4个小组（第1、2、3、5组）</li>
+                        <li>1-18人：3个小组（第1、2、3组）</li>
+                    </ul>
+                `;
+      } else if (isRows) {
+        layoutDesc.innerHTML = `
+                    <ul style="font-size: 14px; color: #666; margin: 10px 0;">
+                        <li>学生将被平均分配到三排</li>
+                        <li>每排分为左右两个小组</li>
+                        <li>如果单数，左边小组多一人</li>
+                    </ul>
+                `;
+      } else if (isArc) {
+        layoutDesc.innerHTML = `
+                    <ul style="font-size: 14px; color: #666; margin: 10px 0;">
+                        <li>圆弧布局：两排，每排18个座位</li>
+                        <li>学生将居中向两侧扩展</li>
+                        <li>每排最多容纳18人</li>
+                    </ul>
+                `;
+      }
+    }
+
+    // 监听字体大小和颜色变化
+    document.getElementById('noteFontSize').addEventListener('change', function (e) {
+      document.execCommand('fontSize', false, '7');
+      const elements = document.getElementsByTagName('font');
+      for (let i = 0; i < elements.length; i++) {
+        if (elements[i].size === '7') {
+          elements[i].removeAttribute('size');
+          elements[i].style.fontSize = e.target.value + 'px';
+        }
+      }
+    });
+
+    document.getElementById('noteColor').addEventListener('change', function (e) {
+      document.execCommand('foreColor', false, e.target.value);
+    });
+
+    function showBatchImportDialog() {
+      document.getElementById('batchImportDialog').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('batchImportError').textContent = '';
+    }
+
+    function hideBatchImportDialog() {
+      document.getElementById('batchImportDialog').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    function processBatchImport() {
+      const text = document.getElementById('batchImportData').value;
+      const classes = text.split('!').filter(c => c.trim()); // 用!分隔每个班级
+      let successCount = 0;
+      let errorMessages = [];
+
+      for (const classText of classes) {
+        try {
+          const lines = classText.split('\n').map(l => l.trim()).filter(l => l);
+          const classInfo = {
+            weekday: {
+              date: '',
+              day: '',
+              weekday: '',
+              time: '',
+              layout: '',
+              groups: null,
+              rowGroups: null,
+              students: []
+            },
+            weekend: {
+              date: '',
+              day: '',
+              weekday: '',
+              time: '',
+              layout: '',
+              groups: null,
+              rowGroups: null,
+              students: []
+            }
+          };
+          let currentSection = '';
+          let currentTimeMode = '';
+
+          // 解析基本信息
+          for (const line of lines) {
+            if (line.startsWith('班级名称:')) {
+              classInfo.name = line.split(':')[1].trim();
+            } else if (line.startsWith('校区:')) {
+              classInfo.campus = line.split(':')[1].trim();
+            } else if (line.startsWith('楼层:')) {
+              classInfo.floor = line.split(':')[1].trim();
+            } else if (line.startsWith('教室:')) {
+              classInfo.room = line.split(':')[1].trim();
+            } else if (line.startsWith('周中布局:')) {
+              const layout = line.split(':')[1].trim();
+              classInfo.weekday.layout = layout === '圆桌' ? 'circular' : layout === '三排' ? 'rows' : 'arc';
+              currentTimeMode = 'weekday';
+              currentSection = '';
+            } else if (line.startsWith('周末布局:')) {
+              const layout = line.split(':')[1].trim();
+              classInfo.weekend.layout = layout === '圆桌' ? 'circular' : layout === '三排' ? 'rows' : 'arc';
+              currentTimeMode = 'weekend';
+              currentSection = '';
+            } else if (line === '周中时间:') {
+              currentTimeMode = 'weekday';
+            } else if (line === '周末时间:') {
+              currentTimeMode = 'weekend';
+            } else if (currentTimeMode && line.startsWith('月:')) {
+              classInfo[currentTimeMode].date = line.split(':')[1].trim();
+            } else if (currentTimeMode && line.startsWith('日:')) {
+              classInfo[currentTimeMode].day = line.split(':')[1].trim();
+            } else if (currentTimeMode && line.startsWith('星期:')) {
+              classInfo[currentTimeMode].weekday = line.split(':')[1].trim();
+            } else if (currentTimeMode && line.startsWith('时间:')) {
+              // 时间可能包含冒号如 "14:30"，取第一个冒号后的全部内容
+              classInfo[currentTimeMode].time = line.substring(line.indexOf(':') + 1).trim();
+            } else if (currentTimeMode && line.startsWith('Group')) {
+              // 处理每个小组的学生
+              const groupMatch = line.match(/Group (\d+):/);
+              if (groupMatch) {
+                const groupIndex = parseInt(groupMatch[1]) - 1;
+                const students = line.substring(line.indexOf(':') + 1)
+                  .split(',')
+                  .map(s => s.trim())
+                  .filter(s => s);
+
+                // 根据当前模式的布局初始化数据结构
+                if (!classInfo[currentTimeMode].groups && classInfo[currentTimeMode].layout === 'circular') {
+                  classInfo[currentTimeMode].groups = Array(6).fill().map(() => Array(6).fill(''));
+                }
+                if (!classInfo[currentTimeMode].rowGroups && classInfo[currentTimeMode].layout === 'rows') {
+                  classInfo[currentTimeMode].rowGroups = {
+                    rows: Array(3).fill().map(() => ({
+                      left: Array(7).fill(''),
+                      right: Array(7).fill('')
+                    }))
+                  };
+                }
+                if (!classInfo[currentTimeMode].groups && classInfo[currentTimeMode].layout === 'arc') {
+                  classInfo[currentTimeMode].groups = Array(2).fill().map(() => Array(18).fill(''));
+                }
+
+                if (classInfo[currentTimeMode].layout === 'circular') {
+                  // 圆桌布局
+                  students.forEach((student, index) => {
+                    if (index < 6) {
+                      classInfo[currentTimeMode].groups[groupIndex][index] = student;
+                    }
+                  });
+                } else if (classInfo[currentTimeMode].layout === 'rows') {
+                  // 三排布局
+                  const rowIndex = Math.floor(groupIndex / 2);
+                  const isRight = groupIndex % 2 === 1;
+                  if (rowIndex < 3) {
+                    const side = isRight ? 'right' : 'left';
+                    students.forEach((student, index) => {
+                      if (index < 7) {
+                        classInfo[currentTimeMode].rowGroups.rows[rowIndex][side][index] = student;
+                      }
+                    });
+                  }
+                } else if (classInfo[currentTimeMode].layout === 'arc') {
+                  // 圆弧布局
+                  const rowIndex = Math.floor(groupIndex / 2);
+                  const isFirstRow = groupIndex % 2 === 0;
+                  if (rowIndex < 2) {
+                    students.forEach((student, index) => {
+                      if (index < 18) {
+                        classInfo[currentTimeMode].groups[rowIndex][index] = student;
+                      }
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          // 验证数据
+          if (!classInfo.name) {
+            throw new Error('缺少班级名称');
+          }
+          if (!classInfo.weekday.layout && !classInfo.weekend.layout) {
+            throw new Error('至少需要一个布局配置（周中或周末）');
+          }
+
+          // 创建班级配置
+          if (!classData[classInfo.name]) {
+            classData[classInfo.name] = {
+              weekday: {
+                layout: 'circular',
+                groups: null,
+                rowGroups: null,
+                currentArrangement: 0,
+                locationInfo: {}
+              },
+              weekend: {
+                layout: 'circular',
+                groups: null,
+                rowGroups: null,
+                currentArrangement: 0,
+                locationInfo: {}
+              }
+            };
+          }
+
+          // 更新班级配置
+          ['weekday', 'weekend'].forEach(timeMode => {
+            if (classInfo[timeMode].layout) { // 只更新有布局配置的时间模式
+              classData[classInfo.name][timeMode] = {
+                layout: classInfo[timeMode].layout,
+                groups: classInfo[timeMode].groups,
+                rowGroups: classInfo[timeMode].rowGroups,
+                currentArrangement: 0,
+                locationInfo: {
+                  campus: classInfo.campus || '',
+                  floor: classInfo.floor || '',
+                  room: classInfo.room || '',
+                  date: classInfo[timeMode].date || '',
+                  day: classInfo[timeMode].day || '',
+                  weekday: classInfo[timeMode].weekday || '',
+                  time: classInfo[timeMode].time || '',
+                  notes: ''
+                }
+              };
+            }
+          });
+
+          successCount++;
+        } catch (e) {
+          errorMessages.push(`班级 ${classText.split('\n')[0].split(':')[1]?.trim() || '未知'}: ${e.message}`);
+        }
+      }
+
+      // 保存到localStorage
+      localStorage.setItem('classSeatingData', JSON.stringify(classData));
+      updateClassSelect();
+
+      // 显示结果
+      const errorDiv = document.getElementById('batchImportError');
+      if (errorMessages.length > 0) {
+        errorDiv.innerHTML = `成功导入 ${successCount} 个班级，${errorMessages.length} 个失败：<br>` +
+          errorMessages.map(msg => `• ${msg}`).join('<br>');
+        errorDiv.className = 'error';
+      } else {
+        errorDiv.textContent = `成功导入 ${successCount} 个班级配置！`;
+        errorDiv.className = 'success';
+        setTimeout(hideBatchImportDialog, 2000);
+      }
+    }
+
+    function toggleLayout() {
+      const classroom = document.getElementById('classroom');
+      if (currentLayout === 'circular') {
+        const students = collectStudentsFromCircular();
+        convertStudentsToRows(students);
+        currentLayout = 'rows';
+        currentArrangement = 0;
+        classroom.className = 'classroom three-rows-layout';
+        refreshSeating();
+      } else if (currentLayout === 'rows') {
+        const students = collectStudentsFromRows();
+        if (students.length > 36) {
+          alert('圆桌布局最多支持36人，当前共有 ' + students.length + ' 人');
+          return;
+        }
+        convertStudentsToCircular(students);
+        currentLayout = 'circular';
+        currentArrangement = 0;
+        classroom.className = 'classroom';
+        refreshSeating();
+      } else if (currentLayout === 'arc') {
+        const students = collectStudentsFromArc();
+        if (students.length > 36) {
+          alert('圆弧布局最多支持36人（每排最多18人），当前共有 ' + students.length + ' 人');
+          return;
+        }
+        convertStudentsToCircular(students);
+        currentLayout = 'circular';
+        currentArrangement = 0;
+        classroom.className = 'classroom';
+        refreshSeating();
+      }
+
+      // 保存当前布局与数据
+      const className = document.getElementById('classSelect').value;
+      if (className) {
+        if (!classData[className]) {
+          classData[className] = {
+            weekday: {
+              layout: currentLayout,
+              groups: null,
+              rowGroups: null,
+              currentArrangement: 0,
+              locationInfo: {}
+            },
+            weekend: {
+              layout: currentLayout,
+              groups: null,
+              rowGroups: null,
+              currentArrangement: 0,
+              locationInfo: {}
+            }
+          };
+        }
+        classData[className][currentTimeMode] = {
+          layout: currentLayout,
+          groups: currentLayout === 'circular' ? JSON.parse(JSON.stringify(groups)) : null,
+          rowGroups: currentLayout === 'rows' ? JSON.parse(JSON.stringify(rowGroups)) : null,
+          arcGroups: currentLayout === 'arc' ? JSON.parse(JSON.stringify(arcGroups)) : null,
+          currentArrangement: currentArrangement,
+          locationInfo: getLocationInfo()
+        };
+        localStorage.setItem('classSeatingData', JSON.stringify(classData));
+      }
+    }
+
+    // 收集当前圆桌布局的非空学生，按组序与座位序
+    function collectStudentsFromCircular() {
+      const list = [];
+      for (let g = 0; g < groups.length; g++) {
+        for (let s = 0; s < groups[g].length; s++) {
+          const name = groups[g][s];
+          if (name && name.trim()) list.push(name.trim());
+        }
+      }
+      return list;
+    }
+
+    // 收集当前三排布局的非空学生，按行、左、右的顺序
+    function collectStudentsFromRows() {
+      const list = [];
+      rowGroups.rows.forEach(row => {
+        row.left.forEach(name => {
+          if (name && name.trim()) list.push(name.trim());
+        });
+        row.right.forEach(name => {
+          if (name && name.trim()) list.push(name.trim());
+        });
+      });
+      return list;
+    }
+
+    // 收集当前圆弧布局的非空学生，按排序与座位序
+    function collectStudentsFromArc() {
+      const list = [];
+      arcGroups.rows.forEach(row => {
+        row.forEach(name => {
+          if (name && name.trim()) list.push(name.trim());
+        });
+      });
+      return list;
+    }
+
+    // 将学生分配到三排布局（尽量平均，每排左右分配，左多一人）
+    function convertStudentsToRows(students) {
+      const total = students.length;
+      rowGroups.rows = Array(3).fill().map(() => ({
+        left: Array(7).fill(''),
+        right: Array(7).fill('')
+      }));
+      rowGroups.colorOrder = [1, 2, 3, 4, 5, 6];
+      const studentsPerRow = Math.ceil(total / 3);
+      let idx = 0;
+      for (let row = 0; row < 3; row++) {
+        const thisRow = Math.min(studentsPerRow, total - row * studentsPerRow);
+        const leftCount = Math.ceil(thisRow / 2);
+        const rightCount = thisRow - leftCount;
+        for (let i = 0; i < leftCount && idx < total && i < 7; i++) {
+          rowGroups.rows[row].left[i] = students[idx++];
+        }
+        for (let i = 0; i < rightCount && idx < total && i < 7; i++) {
+          rowGroups.rows[row].right[i] = students[idx++];
+        }
+      }
+    }
+
+    // 将学生分配到圆桌布局，使用动态组数规则
+    function convertStudentsToCircular(students) {
+      const total = students.length;
+      const numGroups = calcNumGroups(total);
+      const groupIndices = getGroupIndicesForCount(numGroups);
+      groups = Array(6).fill().map(() => Array(6).fill(''));
+      let idx = 0;
+      const base = Math.floor(total / numGroups);
+      const extra = total % numGroups;
+      for (let i = 0; i < numGroups; i++) {
+        const g = groupIndices[i];
+        const thisGroup = i < extra ? base + 1 : base;
+        for (let s = 0; s < thisGroup && idx < total && s < 6; s++) {
+          groups[g][s] = students[idx++];
+        }
+      }
+    }
+
+    // 初始化
+    loadSavedData();
+    updateTime();
+    setInterval(updateTime, 60000);
+    refreshSeating();
+  </script>
+</body>
+
+</html>
